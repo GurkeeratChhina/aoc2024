@@ -12,7 +12,7 @@ class Client:
         now = datetime.now(tz = ZoneInfo("EST"))
 
         self.year = 2024
-        if now.year > self.year or (now.year == self.year and self.day >=25):
+        if now.year > self.year or (now.year == self.year and now.day >=25):
             self.day = 25
         else:
             self.day = now.day
