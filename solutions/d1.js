@@ -73,5 +73,5 @@ const start2 = process.hrtime()
 const result2 = p2("data/d1.txt")
 const time2 = process.hrtime(start2)
 
-console.log(result1, " took ", time1[1]/1000000, " milliseconds")
-console.log(result2, " took ", time2[1]/1000000, " milliseconds")
+console.log("Day 1, part 1 answer: ", result1, " took ", time1[1]/1000000, "milliseconds")
+console.log("Day 1, part 2 answer: ", result2, " took ", time2[1]/1000000, "milliseconds")

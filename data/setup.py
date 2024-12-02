@@ -2,38 +2,38 @@ import requests
 import os
 import re
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 class Client:
     def __init__(self, session_id):
         self.session = requests.Session()
         self.session.cookies.set('session', session_id)
         
-        now = datetime.now()
-        self.day = now.day
-        self.month = now.month
-        if self.month != 12: 
-            self.year = now.year-1
+        now = datetime.now(tz = ZoneInfo("EST"))
+
+        self.year = 2024
+        if now.year > self.year or (now.year == self.year and self.day >=25):
+            self.day = 25
         else:
-            self.year = now.year
+            self.day = now.day
 
     def get_input(self):
-        if self.month != 12:
-            max_date = 25
-        else:
-            max_date = min(self.day, 25)
 
-        for day in range (1, max_date+1):
-            # check if file exists
+        for day in range (1, self.day+1):
+            # check if input file exists
             if not os.path.isfile(f"data/d{day}.txt"):
-                print(f"Getting input data and generating template file for day {day}")
+                print(f"Getting input data for day {day}")
                 url = f'https://adventofcode.com/{self.year}/day/{day}/input'
                 response = self.session.get(url)
                 with open(f"data/d{day}.txt", 'w') as f:
                     f.write(response.text)
+            # check if solution file exists
             if not os.path.isfile(f"solutions/d{day}.js"):
+                print(f"Generating template file for day {day}")
                 with open("data/template.txt") as template, open(f"solutions/d{day}.js", 'w') as newfile:
+                    # copy template line by line, allowing regex to replace references to the day with the appropriate number
                     for line in template:
-                        output = re.sub(r'd1',f'd{day}' , line)
+                        output = re.sub("Day 1", f'Day {day}', re.sub(r'd1',f'd{day}' , line))
                         newfile.write(output)
 
             
