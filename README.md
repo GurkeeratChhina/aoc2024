@@ -1,0 +1,3 @@
+This is AOC 2024 in nodejs. Inspired partially by https://github.com/ahuangg/aoc-ide/tree/main, I've written a python script to grab the input data and generate template js files as new days are released, making sure to only do so if such files don't already exist.
+
+To get working for yourself, make a file called  session.txt which you paste your AOC session ID into, which you can find via the instructions in the aforementioned repository. Make sure to only paste your session key, as my dumb python just reads the file exactly and doesn't parse it at all. You can also write a template file of your choosing and tweak the language by adjusting the file extension. If you want more functionality, refer to the original repo once more.

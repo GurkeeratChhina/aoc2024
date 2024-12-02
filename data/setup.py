@@ -30,6 +30,7 @@ class Client:
                 response = self.session.get(url)
                 with open(f"data/d{day}.txt", 'w') as f:
                     f.write(response.text)
+            if not os.path.isfile(f"solutions/d{day}.js"):
                 with open("data/template.txt") as template, open(f"solutions/d{day}.js", 'w') as newfile:
                     for line in template:
                         output = re.sub(r'd1',f'd{day}' , line)
