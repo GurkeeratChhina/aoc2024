@@ -2,19 +2,45 @@ const fs = require('fs')
 
 const parse = function(filename) {
     var text = fs.readFileSync(filename,'utf8')
+    return text.trim()
+}
 
-    for (const line of text.trim().split("\n")) {
-    }
-    
-    return 
+const find_mults = function(str) {
+    const re = /mul\(\d{1,3}\,\d{1,3}\)/g
+    return str.match(re)
+}
+
+const find_mult_dos = function(str) {
+    const re = /mul\(\d{1,3}\,\d{1,3}\)|do\(\)|don\'t\(\)/g
+    return str.match(re)
+}
+
+const eval_mults = function(str) {
+    let nums = str.slice(4,-1).split(',')
+    return Number(nums[0])*Number(nums[1])
 }
 
 const p1 = function(filename) {
-    return
+    let sum = 0
+    for (let mult of find_mults(parse(filename))) {
+        sum += eval_mults(mult)
+    }
+    return sum
 }
 
 const p2 = function(filename) {
-    return
+    let sum = 0
+    let evaluate = true
+    for (let expr of find_mult_dos(parse(filename))) {
+        if (expr == "do()") {
+            evaluate = true
+        } else if (expr == "don't()") {
+            evaluate = false
+        } else if (evaluate == true) {
+            sum += eval_mults(expr)
+        }
+    }
+    return sum
 }
 
 const start1 = process.hrtime()
