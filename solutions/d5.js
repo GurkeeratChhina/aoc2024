@@ -21,19 +21,12 @@ const parse = function(filename) {
     return [rules, lists]
 }
 
-const check_valid_index = function(x, priors, rules) {
-    for (let a of priors) {
-        if (rules[x].includes(a)) {
-            return false
-        }
-    }
-    return true
-}
-
 const check_valid_list = function(list, rules) {
     for (let i = list.length-1; i>=0; i--) {
-        if (!check_valid_index(list[i], list.slice(0,i), rules)) {
-            return false
+        for (let j = i-1; j>=0; j--) {
+            if (rules[list[i]].includes(list[j])) {
+                return false
+            }
         }
     }
     return true
@@ -47,7 +40,6 @@ const sort_partial_order = function(list, rules) {
                 let y = list[j]
                 list[i] = y
                 list[j] = x
-                j = i-1
             }
         }
     }
