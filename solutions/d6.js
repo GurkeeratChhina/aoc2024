@@ -11,36 +11,16 @@ const parse = function(filename) {
     return data
 }
 
-const my_includes = function(arr, subarr) {
-    for (let element of arr) {
-        if (is_equal_arr(element, subarr)) {
-            return true
-        }
-    }
-    return false
-}
-
-const is_equal_arr = function(arr1, arr2) {
-    if (arr1.length != arr2.length) {
-        return false
-    }
-    for (let i = 0; i<arr1.length; i++) {
-        if (arr1[i] != arr2[i]) {
-            return false
-        }
-    }
-    return true
-}
-
 const loops = function(map, x, y) {
-    let visited = []
+    const visited = new Set()
     let dx = 0
     let dy = -1
     while (true) {
-        if (my_includes(visited, [x, y, dx, dy])) {
+        let encoded = (x*map.length + y)*5+(dx*2+dy+2) 
+        if (visited.has(encoded)) {
             return true
         } else {
-            visited.push([x,y,dx,dy])
+            visited.add(encoded)
         }
         xnext = x+dx
         ynext = y+dy
@@ -62,7 +42,7 @@ const loops = function(map, x, y) {
 const p1 = function(filename) {
     let x = 0
     let y = 0
-    let map = parse(filename)
+    const map = parse(filename)
 
     loop1:
     for (let i = 0; i<map.length; i++) {  
@@ -77,10 +57,10 @@ const p1 = function(filename) {
     
     let dx = 0
     let dy = -1
-    visited = []
+    const visited = new Set()
     while (true) {
-        if (!my_includes(visited, [x, y])) {
-            visited.push([x,y])
+        if (!visited.has(x*map.length+y)) {
+            visited.add(x*map.length+y)
         }
         xnext = x+dx
         ynext = y+dy
@@ -96,7 +76,7 @@ const p1 = function(filename) {
             y = ynext
         }
     }
-    return visited.length
+    return visited.size
 }
 
 const p2 = function(filename) {
@@ -119,10 +99,10 @@ const p2 = function(filename) {
     let y = yi
     let dx = 0
     let dy = -1
-    visited = []
+    const visited = new Set()
     while (true) {
-        if (!my_includes(visited, [x, y])) {
-            visited.push([x,y])
+        if (!visited.has(x*map.length+y)) {
+            visited.add(x*map.length+y)
         }
         xnext = x+dx
         ynext = y+dy
@@ -141,14 +121,15 @@ const p2 = function(filename) {
 
     let count = 0
 
-    for (let i=1;i<visited.length;i++) {
-        let tuple = visited[i]
-        str = map[tuple[1]]
-        map[tuple[1]] = str.substring(0,tuple[0]) + '#' + str.substring(tuple[0]+1)
+    for (const val of visited) {
+        let x = Math.floor(val / 130);
+        let y = val % 130;
+        let str = map[y]
+        map[y] = str.substring(0,x) + '#' + str.substring(x+1)
         if (loops(map, xi, yi)) {
             count ++
         }
-        map[tuple[1]] = str.substring(0,tuple[0]) + '.' + str.substring(tuple[0]+1)
+        map[y] = str.substring(0,x) + '.' + str.substring(x+1)
     }
 
     return count
