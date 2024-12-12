@@ -2,6 +2,8 @@ const fs = require('fs')
 
 const directions = [[1,0],[-1,0],[0,-1],[0,1]]
 
+const diags = [[1,1], [1,-1], [-1,1], [-1,-1]]
+
 const parse = function(filename) {
     var text = fs.readFileSync(filename,'utf8')
     let data = []
@@ -19,56 +21,23 @@ const setpop = function(S) {
     }
 }
 
-const count_sides = function(point_set) {
+const count_sides_2 = function(point_set) {
     let c = 0
     for (let p of point_set) {
         let x = JSON.parse(p)[0]
         let y = JSON.parse(p)[1]
-        let u = JSON.stringify([x-1, y])
-        let d = JSON.stringify([x+1, y])
-        let l = JSON.stringify([x, y-1])
-        let r = JSON.stringify([x, y+1])
-        let ul = JSON.stringify([x-1, y-1])
-        let ur = JSON.stringify([x-1, y+1])
-        let dl = JSON.stringify([x+1, y-1])
-        let dr = JSON.stringify([x+1, y+1])
-
-        if (!point_set.has(u) && !point_set.has(l) && !point_set.has(ul)) {
-            c+=1
-        }
-        if (!point_set.has(d) && !point_set.has(r) && !point_set.has(dr)) {
-            c+=1
-        }
-        if (!point_set.has(u) && !point_set.has(r) && !point_set.has(ur)) {
-            c+=1
-        }
-        if (!point_set.has(d) && !point_set.has(l) && !point_set.has(dl)) {
-            c+=1
-        }
-    }
-    return c
-}
-
-const count_sides_inverse = function(point_set, mheight, mwidth) {
-    let c = 0
-    for (let p of point_set) {
-        let x = JSON.parse(p)[0]
-        let y = JSON.parse(p)[1]
-        let u = JSON.stringify([x-1, y])
-        let d = JSON.stringify([x+1, y])
-        let l = JSON.stringify([x, y-1])
-        let r = JSON.stringify([x, y+1])
-        if (x-1 >= 0 && y-1 >= 0 && !point_set.has(u) && !point_set.has(l)) {
-            c+=1
-        }
-        if (x+1 < mheight && y+1 < mwidth && !point_set.has(d) && !point_set.has(r)) {
-            c+=1
-        }
-        if (x-1 >= 0 && y+1 < mwidth && !point_set.has(u) && !point_set.has(r)) {
-            c+=1
-        }
-        if (x+1 < mheight && y-1 >= 0 && !point_set.has(d) && !point_set.has(l)) {
-            c+=1
+        for (let d of diags) {
+            nx = x + d[0]
+            ny = y + d[1]
+            v = JSON.stringify([nx,y])
+            h = JSON.stringify([x,ny])
+            vh = JSON.stringify([nx,ny])
+            if(!point_set.has(v) && !point_set.has(h)) {
+                c+=1
+            }
+            if(point_set.has(v) && point_set.has(h) && !point_set.has(vh)) {
+                c+=1
+            }
         }
     }
     return c
@@ -140,14 +109,6 @@ const p2 = function(filename) {
     let height = grid.length
     let width = grid[0].length
 
-    let full_set = new Set()
-    for (let i = 0; i < height; i++) {
-        for (let j = 0; j<width; j++) {
-            key = JSON.stringify([i,j])
-            full_set.add(key)
-        }
-    }
-
     for (let i = 0; i < height; i++) {
         for (let j = 0; j<width; j++) {
             key = JSON.stringify([i,j])
@@ -181,10 +142,7 @@ const p2 = function(filename) {
                 }
             }
             visited = visited.union(found)
-            let unvisited = full_set.difference(found)
-            // console.log(id, count_sides(found), count_sides_inverse(unvisited, height, width))
-            let sides = count_sides(found) + count_sides_inverse(unvisited, height, width)
-            // console.log(id, sides)
+            let sides = count_sides_2(found)
             sum += area*sides
         }
     }
