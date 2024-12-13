@@ -1,2 +1,4 @@
 *.txt
 temp.js
+/node_modules
+*.json
