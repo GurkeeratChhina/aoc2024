@@ -42,6 +42,38 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+const extended_euclid = function(M, N) {
+    let r1 = M
+    let r2 = N
+    let s1 = 1
+    let s2 = 0
+    let t1 = 0
+    let t2 = 1
+    while(r2 > 0) {
+        let rtemp = r1 % r2
+        let q = (r1-rtemp)/r2
+        let stemp = s1 - q*s2
+        let ttemp = t1 - q*t2
+        r1 = r2
+        r2 = rtemp
+        s1 = s2
+        s2 = stemp
+        t1 = t2
+        t2 = ttemp
+    }
+    return [s1, t1]
+}
+
+// x = a mod M, b mod N
+const CRT = function(a, b, M, N) {
+    let [c, d] = extended_euclid(M,N)
+    let X = (a*N*d +b*M*c) % (M*N)
+    if (X < 0) {
+        X += M*N
+    }
+    return X
+}
+
 const p1 = function(filename) {
     let data = parse(filename)
     // console.log(data)
@@ -68,21 +100,116 @@ const p1 = function(filename) {
     return quad1*quad2*quad3*quad4
 }
 
-const p2 = async function(filename) {
+const p2 = function(filename) {
     let data = parse(filename)
     let mx = 101
     let my = 103
-    for (let i = 0; i< Math.max(mx,my); i++) {
+    let hband = 0
+    let vband = 0
+    let treeheight = 33
+    let treewidgth = 31
+    for (let i = 0; i< Math.max(mx, my); i++) {
         let points = new Set()
         for (let X of data) {
             let [fx, fy] = iterate_looping.apply(this, X.concat([i,mx,my]))
             points.add(fx*mx+fy)
         }
-        // visually find when the input produces "bands" and then CRT the result manually
-        console.log(i); 
-        draw_grid(points, mx, my);
-        await sleep(100)
+        if (hband >0 && vband >0) {
+            break
+        } else if (vband > 0) {
+            let height_map = new Map()
+            for (let n = 0; n < my; n++) {
+                height_map.set(n, 0)
+            }
+
+            for (let p of points) {
+                let y = p%mx
+                height_map.set(y, height_map.get(y)+1)
+            }
+
+            let count = 0
+            for (let k = 0; k <treeheight; k++) {
+                count += height_map.get(k)
+            }
+            for (let j = 0; j<my-treeheight; j++) {
+                if (count > points.size/2) {
+                    hband = i
+                    break
+                }
+                count -= height_map.get(j)
+                count += height_map.get(j+treeheight)
+            }
+        } else if (hband > 0) {
+            let width_map = new Map()
+            for (let n = 0; n < mx; n++) {
+                width_map.set(n, 0)
+            }
+
+            for (let p of points) {
+                let x = Math.floor(p/mx)
+                width_map.set(x, width_map.get(x)+1)
+            }
+
+            count = 0
+            for (let k = 0; k <treewidgth; k++) {
+                count += width_map.get(k)
+            }
+            for (let j = 0; j<my-treewidgth; j++) {
+                if (count > points.size/2) {
+                    vband = i
+                    break
+                }
+                count -= width_map.get(j)
+                count += width_map.get(j+treewidgth)
+            }
+        } else {
+            let height_map = new Map()
+            let width_map = new Map()
+            for (let n = 0; n < mx; n++) {
+                width_map.set(n, 0)
+            }
+            for (let n = 0; n < my; n++) {
+                height_map.set(n, 0)
+            }
+
+            for (let p of points) {
+                let y = p%mx
+                let x = Math.floor(p/mx)
+                height_map.set(y, height_map.get(y)+1)
+                width_map.set(x, width_map.get(x)+1)
+            }
+
+            let count = 0
+            for (let k = 0; k <treeheight; k++) {
+                count += height_map.get(k)
+            }
+            for (let j = 0; j<my-treeheight; j++) {
+                if (count > points.size/2) {
+                    hband = i
+                    break
+                }
+                count -= height_map.get(j)
+                count += height_map.get(j+treeheight)
+            }
+
+            count = 0
+            for (let k = 0; k <treewidgth; k++) {
+                count += width_map.get(k)
+            }
+            for (let j = 0; j<my-treewidgth; j++) {
+                if (count > points.size/2) {
+                    vband = i
+                    break
+                }
+                count -= width_map.get(j)
+                count += width_map.get(j+treewidgth)
+            }
+            
+        }
     }
+    // console.log(hband, vband)
+    // X = hband mod my, X = vband mod mx
+    return CRT(hband, vband, my, mx)
 }
 
 const start1 = process.hrtime()
