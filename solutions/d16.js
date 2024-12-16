@@ -58,7 +58,7 @@ const p1 = function(filename) {
     let grid = parse(filename)
     let width = grid[0].length
     const start = find_start(grid)
-    const initial_direction = cardinals[0]
+    const initial_direction = cardinals[2]
     const end = find_end(grid)
 
     let visited = new Map()
@@ -119,7 +119,7 @@ const p2 = function(filename) {
     let grid = parse(filename)
     let width = grid[0].length
     let start = find_start(grid)
-    let initial_direction = cardinals[0]
+    let initial_direction = cardinals[2]
     const end = find_end(grid)
 
     let visited = new Map()
@@ -257,9 +257,9 @@ const p2_2 = function(filename) {
 
     while (queue.length > 0) {
         let [pos, dir, cv] = queue.shift()
-        // if (pos.equals(end)) {
-        //     continue
-        // }
+        if (pos.equals(end)) {
+            continue
+        }
         let forward = math.add(pos, dir)
         if (grid[forward.im][forward.re] == '.') {
             let nv = cv +1
@@ -340,13 +340,13 @@ const p2_2 = function(filename) {
             queue.push([pos,right])
         }
     }
-    for (let i = 0; i< grid.length; i++) {
-        let newline = ""
-        for (let j = 0; j < grid[0].length; j++) {
-            newline = newline.concat(grid[i][j])
-        }
-        console.log(newline)
-    }
+    // for (let i = 0; i< grid.length; i++) {
+    //     let newline = ""
+    //     for (let j = 0; j < grid[0].length; j++) {
+    //         newline = newline.concat(grid[i][j])
+    //     }
+    //     console.log(newline)
+    // }
     return onpath.size
 }
 
