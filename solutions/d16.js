@@ -247,7 +247,7 @@ const p2_2 = function(filename) {
     let grid = parse(filename)
     let width = grid[0].length
     let start = find_start(grid)
-    let initial_direction = cardinals[0]
+    let initial_direction = cardinals[2]
     const end = find_end(grid)
 
     let visited = new Map()
@@ -273,9 +273,11 @@ const p2_2 = function(filename) {
                 queue.push([forward, dir, nv])
             }
         }
+
         let left = math.multiply(dir, math.complex("i"))
         let right = math.multiply(dir, math.complex("-i"))
         let nv = cv + 1000
+
         if (visited.has(encode(pos, left, width))) {
             if (visited.get(encode(pos,left,width)) > nv ) {
                 visited.set(encode(pos,left,width), nv)
@@ -285,6 +287,7 @@ const p2_2 = function(filename) {
             visited.set(encode(pos,left,width), nv)
             queue.push([pos, left, nv])
         }
+
         if (visited.has(encode(pos, right, width))) {
             if (visited.get(encode(pos,right,width)) > nv ) {
                 visited.set(encode(pos,right,width), nv)
