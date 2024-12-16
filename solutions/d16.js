@@ -257,9 +257,9 @@ const p2_2 = function(filename) {
 
     while (queue.length > 0) {
         let [pos, dir, cv] = queue.shift()
-        if (pos.equals(end)) {
-            continue
-        }
+        // if (pos.equals(end)) {
+        //     continue
+        // }
         let forward = math.add(pos, dir)
         if (grid[forward.im][forward.re] == '.') {
             let nv = cv +1
@@ -296,15 +296,22 @@ const p2_2 = function(filename) {
         }
     }
 
+    let min = 1e100
+    for (let i = 0; i<cardinals.length; i++) {
+        if (visited.has(encode(end, cardinals[i], width))) {
+            min = Math.min(min, visited.get(encode(end, cardinals[i], width)))
+        }
+    }
+
     let onpath = new Set()
     onpath.add(end.im*width+end.re)
     queue = []
     for (let i = 0; i<cardinals.length; i++) {
         if (visited.has(encode(end, cardinals[i], width)) && visited.get(encode(end, cardinals[i], width)) == min) {
             queue.push([end, cardinals[i]])
-            
         }
     }
+    // console.log(queue)
     while (queue.length > 0) {
         let [pos, dir] = queue.shift()
         let curr_val = visited.get(encode(pos, dir, width))
@@ -317,8 +324,10 @@ const p2_2 = function(filename) {
         let l_val = visited.get(encode(pos, left, width)) || 1e100
         let r_val = visited.get(encode(pos, right, width)) || 1e100
 
+        // console.log(b_val)
         if (b_val < curr_val) {
             onpath.add(backward.im*width+backward.re)
+            grid[backward.im][backward.re] = 'O'
             queue.push([backward,dir])
         }
         if (l_val < curr_val) {
@@ -328,7 +337,13 @@ const p2_2 = function(filename) {
             queue.push([pos,right])
         }
     }
-
+    for (let i = 0; i< grid.length; i++) {
+        let newline = ""
+        for (let j = 0; j < grid[0].length; j++) {
+            newline = newline.concat(grid[i][j])
+        }
+        console.log(newline)
+    }
     return onpath.size
 }
 
@@ -340,7 +355,7 @@ console.log("Day 16, part 1 answer:", result1, "took", time1[0], "seconds and", 
 
 
 const start2 = process.hrtime()
-const result2 = p2("data/d16.txt")
+const result2 = p2_2("data/d16.txt")
 const time2 = process.hrtime(start2)
 
 console.log("Day 16, part 2 answer:", result2, "took", time2[0], "seconds and", time2[1]/1000000, "milliseconds")
