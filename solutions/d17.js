@@ -63,17 +63,21 @@ const p1 = function(filename) {
 
 const p2 = function(filename) {
     let instructs = parse(filename)
-    let i = 0;
-    let j = 0
-    while (j>=0) {
-        state.reset(i)
-        let result = state.run()
+    let queue = [];
+    queue.push(0);
+    let answer = 1e100
+    while (queue.length >0) {
+        let i = queue.shift()
         // console.log(i, result)
-        if (JSON.stringify(result) == JSON.stringify(instructs)) {break}
-        if (result[0] == instructs[j]) {i*=8; j--}
-        else {i++}
+        for (let j = 0; j<8; j++) {
+            state.reset(i+j)
+            result = state.run()
+            if (result.length>instructs.length) {continue}
+            if (JSON.stringify(result) == JSON.stringify(instructs)) {answer = Math.min(answer, i+j)}
+            if (result[0] == instructs[instructs.length-result.length]) {queue.push((i+j)*8)}
+        }
     }
-    return i
+    return answer
 }
 
 const start1 = process.hrtime()
