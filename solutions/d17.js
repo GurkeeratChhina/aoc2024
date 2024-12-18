@@ -55,7 +55,6 @@ const state = {
 
 
 const p1 = function(filename) {
-    return 0
     parse(filename)
     // console.log(state)
     return JSON.stringify(state.run())
