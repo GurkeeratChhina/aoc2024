@@ -19,9 +19,10 @@ const is_possible = function(arrangement, towels) {
         return cache.get(arrangement)
     }
     if (arrangement.length == 0) {
-        cache.set(arrangement, true)
-        return true
+        cache.set(arrangement, 1)
+        return 1
     }
+    let sum = 0
     for (let towel of towels) {
         let regex = new RegExp('^'.concat(towel))
         // console.log(regex)
@@ -29,15 +30,13 @@ const is_possible = function(arrangement, towels) {
         if (regex.test(arrangement)) {
             let remainder = arrangement.slice(towel.length)
             if (is_possible(remainder,towels)) {
-                cache.set(arrangement, true)
-                // console.log("is possible")
-                return true
+                sum += cache.get(remainder)
             }
         }
     }
-    cache.set(arrangement, false)
+    cache.set(arrangement, sum)
     // console.log("isnt possible")
-    return false
+    return sum
 }
 
 const p1 = function(filename) {
@@ -52,8 +51,12 @@ const p1 = function(filename) {
 }
 
 const p2 = function(filename) {
-    let data = parse(filename)
-    return
+    let [towels, arrangements] = parse(filename)
+    let count = 0
+    for (let arrangement of arrangements) {
+        count += is_possible(arrangement, towels)
+    }
+    return count
 }
 
 const start1 = process.hrtime()
