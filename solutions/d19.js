@@ -13,9 +13,7 @@ const parse = function(filename) {
 }
 
 const is_possible = function(arrangement, towels) {
-    // console.log("testing", arrangement)
     if (cache.has(arrangement)) {
-        // console.log("already calculated", arrangement)
         return cache.get(arrangement)
     }
     if (arrangement.length == 0) {
@@ -25,8 +23,6 @@ const is_possible = function(arrangement, towels) {
     let sum = 0
     for (let towel of towels) {
         let regex = new RegExp('^'.concat(towel))
-        // console.log(regex)
-        // console.log(regex.test(arrangement))
         if (regex.test(arrangement)) {
             let remainder = arrangement.slice(towel.length)
             if (is_possible(remainder,towels)) {
@@ -35,7 +31,6 @@ const is_possible = function(arrangement, towels) {
         }
     }
     cache.set(arrangement, sum)
-    // console.log("isnt possible")
     return sum
 }
 
