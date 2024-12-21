@@ -1,7 +1,6 @@
 const fs = require('fs')
-const math = require('mathjs')
 
-const directions = [math.complex("-1"), math.complex("-i"), math.complex("1"), math.complex("i")]
+const directions = [[0,1],[0,-1],[1,0],[-1,0]]
 
 const parse = function(filename) {
     var text = fs.readFileSync(filename,'utf8')
@@ -16,7 +15,7 @@ const find_start = function (grid) {
     for (let i = 0; i< grid.length; i++) {
         for (let j = 0; j < grid[0].length; j++) {
             if (grid[i][j] == 0) {
-                return math.complex(j, i)
+                return [j, i]
             }
         }
     }
@@ -36,22 +35,21 @@ const to_number = function(char) {
 
 const min_path = function(grid) {
     const start = find_start(grid)
-    const width = grid[0].length
-
     let queue = []
     queue.push(start)
 
     while (queue.length > 0) {
-        let curr = queue.shift()
-        let curr_val = grid[curr.im][curr.re]
+        let [cx, cy] = queue.shift()
+        let curr_val = grid[cy][cx]
         for (let dir of directions) {
-            let next = math.add(curr, dir)
-            let next_val = grid[next.im][next.re]
+            let nx = cx + dir[0]
+            let ny = cy + dir[1]
+            let next_val = grid[ny][nx]
             if (next_val == -1) {
                 continue
             } else if (next_val > curr_val + 1) {
-                grid[next.im][next.re] = curr_val + 1
-                queue.push(next)
+                grid[ny][nx] = curr_val + 1
+                queue.push([nx, ny])
             }
         }
     }
@@ -61,7 +59,7 @@ const find_cheats = function(grid, radius, saving) {
     let count = 0
     for (let i = 0; i < grid.length; i++) {
         for (let j = 0; j < grid[0].length; j++) {
-            count += find_cheats_pointed(grid, i, j, radius, saving)
+            count += find_cheats_pointed(grid, j, i, radius, saving)
         }
     }
     return count
