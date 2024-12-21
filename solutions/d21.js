@@ -12,26 +12,18 @@ const parse = function(filename) {
 const pad_distance = function(a,b) {
     let dx = x_coord(b)-x_coord(a)
     let dy = y_coord(b)-y_coord(a)
-    if (dx == 0 && dy == 0) {
-        return ['A']
-    } else if (dx == 0 && dy > 0) {
-        return ['D'.repeat(dy).concat('A')]
-    } else if (dx == 0) {
-        return ['U'.repeat(-1*dy).concat('A')]
-    } else if (dy == 0 && dx > 0) {
-        return ['R'.repeat(dx).concat('A')]
-    } else if (dy == 0) {
-        return ['L'.repeat(-1*dx).concat('A')]
-    } else if (dx > 0 && dy >0) {
-        return ['R'.repeat(dx).concat('D'.repeat(dy)).concat('A'),'D'.repeat(dy).concat('R'.repeat(dx)).concat('A')]
-    } else if (dx > 0) {
-        return ['R'.repeat(dx).concat('U'.repeat(-1*dy)).concat('A'),'U'.repeat(-1*dy).concat('R'.repeat(dx)).concat('A')]
-    } else if (dy > 0) {
-        return ['L'.repeat(-1*dx).concat('D'.repeat(dy)).concat('A'),'D'.repeat(dy).concat('L'.repeat(-1*dx)).concat('A')]
-    } else if (y_coord(a) < 3 || x_coord(a) + dx > 0) {
-        return ['L'.repeat(-1*dx).concat('U'.repeat(-1*dy)).concat('A'),'U'.repeat(-1*dy).concat('L'.repeat(-1*dx)).concat('A')]
+    let up = 'U'.repeat(Math.max(0, -1*dy))
+    let down = 'D'.repeat(Math.max(0, dy))
+    let left = 'L'.repeat(Math.max(0, -1*dx))
+    let right = 'R'.repeat(Math.max(0, dx))
+    if (x_coord(a) == 0 && y_coord(a)+dy == 3) {
+        // single path
+        return [left.concat(right).concat(up).concat(down).concat('A')]
+    } else if (y_coord(a) == 3 && x_coord(a)+dx == 0) {
+        // also single path
+        return [up.concat(down).concat(left).concat(right).concat('A')]
     } else {
-        return ['U'.repeat(-1*dy).concat('L'.repeat(-1*dx)).concat('A')]
+        return [up.concat(down).concat(left).concat(right).concat('A'), left.concat(right).concat(up).concat(down).concat('A')]
     }
 }
 
@@ -79,7 +71,6 @@ const p1 = function(filename) {
             }
             possibilities = new_possibilities
         }
-        // console.log(possibilities)
         let min = 1e100
         for (let p of possibilities) {
             min = Math.min(min, p.length)
