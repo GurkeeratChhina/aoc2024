@@ -7,7 +7,7 @@ const parse = function(filename) {
     var text = fs.readFileSync(filename,'utf8')
     let data = []
     for (const line of text.trim().split("\n")) {
-        data.push(line.trim().split(''))
+        data.push(line.trim().split('').map(x=>to_number(x)))
     }
     return data
 }
@@ -15,156 +15,90 @@ const parse = function(filename) {
 const find_start = function (grid) {
     for (let i = 0; i< grid.length; i++) {
         for (let j = 0; j < grid[0].length; j++) {
-            if (grid[i][j] == 'S') {
-                grid[i][j] = '.'
+            if (grid[i][j] == 0) {
                 return math.complex(j, i)
             }
         }
     }
 }
 
-const find_end = function (grid) {
-    for (let i = 0; i< grid.length; i++) {
-        for (let j = 0; j < grid[0].length; j++) {
-            if (grid[i][j] == 'E') {
-                grid[i][j] = '.'
-                return math.complex(j, i)
-            }
-        }
+const to_number = function(char) {
+    switch (char) {
+        case 'S':
+            return 0
+        case 'E':
+        case '.':
+            return 1e20
+        case '#':
+            return -1
     }
 }
 
-const l1_dist = function(a, b) {
-    return Math.abs(a.re-b.re) + Math.abs(a.im-b.im)
-}
-
-
-const p1 = function(filename) {
-    let grid = parse(filename)
-    let width = grid[0].length
+const min_path = function(grid) {
     const start = find_start(grid)
-    const end = find_end(grid)
+    const width = grid[0].length
 
-
-    const encode = function(position) {
-        return position.im*width + position.re
-    }
-
-    const decode = function(code) {
-        return math.complex(code%width, Math.floor(code/width))
-    }
-
-    const l1_sphere = function(point, distance) {
-        let circle = new Set()
-        circle.add(point)
-        let next_circle = new Set()
-        let sphere = []
-        sphere.push(circle)
-        for (let i = 0; i < distance; i++) {
-            for (let p of circle){
-                for (let dir of directions) {
-                    let next_point = math.add(decode(p),dir)
-                    next_circle.add(encode(next_point))
-                }
-            }
-            // console.log(next_circle)
-            sphere.push(next_circle)
-            circle = next_circle
-            next_circle = new Set()
-        }
-        return sphere
-    }
-
-    let visited = new Map()
-    visited.set(encode(start),0)
     let queue = []
     queue.push(start)
 
     while (queue.length > 0) {
         let curr = queue.shift()
+        let curr_val = grid[curr.im][curr.re]
         for (let dir of directions) {
             let next = math.add(curr, dir)
-            if (grid[next.im][next.re] == '#') {
+            let next_val = grid[next.im][next.re]
+            if (next_val == -1) {
                 continue
-            }
-            let val = visited.get(encode(curr))
-            if (visited.has(encode(next))) {
-                if (visited.get(encode(next)) > val + 1) {
-                    visited.set(encode(next), val+1)
-                    queue.push(next)
-                }
-            } else {
-                visited.set(encode(next), val+1)
+            } else if (next_val > curr_val + 1) {
+                grid[next.im][next.re] = curr_val + 1
                 queue.push(next)
             }
         }
     }
+}
 
+const find_cheats = function(grid, radius, saving) {
     let count = 0
-    for (let [key, val] of visited) {
-        let l1_distances = l1_sphere(key, 2)
-        for (let i = 1; i<l1_distances.length; i++) {
-            for (let p of l1_distances[i]) {
-                if (visited.has(p) && visited.get(p) - val >= (100+i)) {
-                    count++
-                }
-            }            
+    for (let i = 0; i < grid.length; i++) {
+        for (let j = 0; j < grid[0].length; j++) {
+            count += find_cheats_pointed(grid, i, j, radius, saving)
         }
     }
     return count
 }
 
-const p2 = function(filename) {
-    let grid = parse(filename)
-    let width = grid[0].length
-    let height = grid.length
-    const start = find_start(grid)
-    const end = find_end(grid)
-
-
-    const encode = function(position) {
-        return position.im*width + position.re
-    }
-
-    const decode = function(code) {
-        return math.complex(code%width, Math.floor(code/width))
-    }
-
-    let visited = new Map()
-    visited.set(encode(start),0)
-    let queue = []
-    queue.push(start)
-
-    while (queue.length > 0) {
-        let curr = queue.shift()
-        for (let dir of directions) {
-            let next = math.add(curr, dir)
-            if (grid[next.im][next.re] == '#') {
+const find_cheats_pointed = function(grid, x, y, radius, saving) {
+    let count = 0
+    for (let dx = -1*radius; dx <= radius; dx++) {
+        let leftover = radius - Math.abs(dx)
+        for (let dy = -1*leftover; dy <= leftover ;dy++) {
+            let nx = x+dx
+            let ny = y+dy
+            if (nx < 0 || nx >= grid[0].length || ny < 0 || ny >= grid.length) {
+                continue
+            } else if (grid[ny][nx] == -1){
                 continue
             }
-            let val = visited.get(encode(curr))
-            if (visited.has(encode(next))) {
-                if (visited.get(encode(next)) > val + 1) {
-                    visited.set(encode(next), val+1)
-                    queue.push(next)
-                }
-            } else {
-                visited.set(encode(next), val+1)
-                queue.push(next)
-            }
-        }
-    }
-
-    let count = 0
-    for (let [key1, val1] of visited) {
-        for (let [key2, val2] of visited) {
-            let d = l1_dist(decode(key1), decode(key2))
-            if (d <= 20 && val1 - val2 - d >= 100) {
+            let d = Math.abs(dx) + Math.abs(dy)
+            if (grid[y][x] - grid[ny][nx] - d >= saving) {
                 count++
             }
         }
     }
     return count
+}
+
+
+const p1 = function(filename) {
+    let grid = parse(filename)
+    min_path(grid)
+    return find_cheats(grid, 2, 100)
+}
+
+const p2 = function(filename) {
+    let grid = parse(filename)
+    min_path(grid)
+    return find_cheats(grid, 20, 100)
 }
 
 const start1 = process.hrtime()
