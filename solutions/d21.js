@@ -1,5 +1,7 @@
 const fs = require('fs')
 
+const cache = new Map()
+
 const parse = function(filename) {
     var text = fs.readFileSync(filename,'utf8')
     let data = []
@@ -47,43 +49,44 @@ const y_coord = function(a) {
     return 2-Math.floor((Number(a)-1)/3)
 }
 
+const instr_length = function(string, iterations) {
+    // console.log(string, iterations)
+    if (iterations == 0) {
+        return string.length
+    }
+    if (cache.has(JSON.stringify([string, iterations]))) {
+        return cache.get(JSON.stringify([string, iterations]))
+    }
+    let sum = 0
+    sum += Math.min(...pad_distance('A',string[0]).map(x=>instr_length(x, iterations-1)))
+    for (let i = 0; i < string.length-1; i++) {
+        let paths = pad_distance(string[i],string[i+1])
+        // console.log(paths, iterations)
+        sum += Math.min(...paths.map(x=>instr_length(x, iterations-1)))
+    }
+    cache.set(JSON.stringify([string, iterations]), sum)
+    // console.log(string, iterations, sum)
+    return sum
+}
+
 const p1 = function(filename) {
     let data = parse(filename)
     let sum = 0
     for (let line of data) {
-        let possibilities = new Set()
-        possibilities.add('A'.concat(line))
-        for (k = 0; k < 3; k++) {
-            let new_possibilities = new Set()
-            for (let p of possibilities) {
-                let partial_possibilities = new Set()
-                partial_possibilities.add('A')                
-                for (let i = 0; i < p.length-1; i++) {
-                    let new_partials = new Set()
-                    for (let ending of pad_distance(p[i],p[i+1])) {
-                        for (let p2 of partial_possibilities) {
-                            new_partials.add(p2.concat(ending))
-                        }
-                    }
-                    partial_possibilities = new_partials
-                }
-                new_possibilities = new_possibilities.union(partial_possibilities)
-            }
-            possibilities = new_possibilities
-        }
-        let min = 1e100
-        for (let p of possibilities) {
-            min = Math.min(min, p.length)
-        }
-        console.log(min-1, Number(line.match(/\d+/)))
-        sum += (min-1)*Number(line.match(/\d+/))
+        // console.log(instr_length(line, 3), Number(line.match(/\d+/)))
+        sum += instr_length(line, 3)*Number(line.match(/\d+/))
     }
     return sum
 }
 
 const p2 = function(filename) {
     let data = parse(filename)
-    return 
+    let sum = 0
+    for (let line of data) {
+        // console.log(instr_length(line, 26), Number(line.match(/\d+/)))
+        sum += instr_length(line, 26)*Number(line.match(/\d+/))
+    }
+    return sum
 }
 
 const start1 = process.hrtime()
